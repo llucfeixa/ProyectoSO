@@ -32,7 +32,6 @@
             this.usuario = new System.Windows.Forms.TextBox();
             this.EnviarButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.Conectados = new System.Windows.Forms.RadioButton();
             this.TablaConectados = new System.Windows.Forms.DataGridView();
             this.jugadorG = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -51,6 +50,7 @@
             this.LogInButton = new System.Windows.Forms.Button();
             this.DesconectarButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TablaConectados)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -73,7 +73,7 @@
             this.usuario.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.usuario.Name = "usuario";
             this.usuario.Size = new System.Drawing.Size(244, 26);
-            this.usuario.TabIndex = 3;
+            this.usuario.TabIndex = 0;
             // 
             // EnviarButton
             // 
@@ -89,7 +89,6 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.groupBox1.Controls.Add(this.Conectados);
             this.groupBox1.Controls.Add(this.TablaConectados);
             this.groupBox1.Controls.Add(this.jugadorG);
             this.groupBox1.Controls.Add(this.label5);
@@ -110,18 +109,6 @@
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Petición";
-            // 
-            // Conectados
-            // 
-            this.Conectados.AutoSize = true;
-            this.Conectados.Location = new System.Drawing.Point(600, 265);
-            this.Conectados.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.Conectados.Name = "Conectados";
-            this.Conectados.Size = new System.Drawing.Size(177, 24);
-            this.Conectados.TabIndex = 23;
-            this.Conectados.TabStop = true;
-            this.Conectados.Text = "Lista de conectados";
-            this.Conectados.UseVisualStyleBackColor = true;
             // 
             // TablaConectados
             // 
@@ -240,7 +227,7 @@
             this.Register.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Register.Name = "Register";
             this.Register.Size = new System.Drawing.Size(94, 24);
-            this.Register.TabIndex = 7;
+            this.Register.TabIndex = 3;
             this.Register.TabStop = true;
             this.Register.Text = "Register";
             this.Register.UseVisualStyleBackColor = true;
@@ -252,7 +239,7 @@
             this.Login.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Login.Name = "Login";
             this.Login.Size = new System.Drawing.Size(78, 24);
-            this.Login.TabIndex = 8;
+            this.Login.TabIndex = 2;
             this.Login.TabStop = true;
             this.Login.Text = "Log-in";
             this.Login.UseVisualStyleBackColor = true;
@@ -270,17 +257,18 @@
             // 
             // password
             // 
+            this.password.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.password.Location = new System.Drawing.Point(238, 119);
             this.password.Name = "password";
             this.password.Size = new System.Drawing.Size(244, 26);
-            this.password.TabIndex = 10;
+            this.password.TabIndex = 1;
             // 
             // LogInButton
             // 
             this.LogInButton.Location = new System.Drawing.Point(693, 71);
             this.LogInButton.Name = "LogInButton";
             this.LogInButton.Size = new System.Drawing.Size(200, 75);
-            this.LogInButton.TabIndex = 7;
+            this.LogInButton.TabIndex = 4;
             this.LogInButton.Text = "Log-In";
             this.LogInButton.UseVisualStyleBackColor = true;
             this.LogInButton.Click += new System.EventHandler(this.LogInButton_Click);
@@ -298,6 +286,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.LogInButton);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.label1);
@@ -313,6 +302,16 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Acceso";
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(292, 159);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(142, 20);
+            this.label6.TabIndex = 16;
+            this.label6.Text = "Mostar contraseña";
+            this.label6.Click += new System.EventHandler(this.label6_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -324,6 +323,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -357,8 +357,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton Conectados;
         private System.Windows.Forms.DataGridView TablaConectados;
+        private System.Windows.Forms.Label label6;
     }
 }
 

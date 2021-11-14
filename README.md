@@ -10,3 +10,15 @@ URL: https://drive.google.com/file/d/1oUdY2UWQeP4TDvMvELPp5WDyor81_41s/view?usp=
 Versión 2 generada por Pau
 
 Versión 2 verificada por Lluc
+
+Versión 2 comunicada por Óscar
+
+URL: https://drive.google.com/file/d/1ekilvBMTR1JfY_2ed4VugWQ2JbDIer2U/view?usp=sharing
+
+Versión 3 generada por Óscar
+
+Versión 3 verificada por Pau
+
+Versión 3 comunicada por Lluc
+
+URL: https://drive.google.com/file/d/1GJMR4PlOq4KP_IVsXBDOrJNTTfkDMp7s/view?usp=sharing

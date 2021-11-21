@@ -32,10 +32,12 @@ namespace WindowsFormsApplication1
             groupBox1.Visible = false;
             password.UseSystemPasswordChar = true;            
             this.WindowState = FormWindowState.Maximized;
+            TablaConectados.ReadOnly = true;
         }
 
         private void PonDataGridView(string[] trozos)
         {
+            
             trozos[trozos.Length - 1] = trozos[trozos.Length - 1].Split('\0')[0];
             TablaConectados.Rows.Clear();
             TablaConectados.RowHeadersVisible = false;
@@ -47,6 +49,11 @@ namespace WindowsFormsApplication1
             TablaConectados.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             TablaConectados.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             TablaConectados.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            DataGridViewCheckBoxColumn dgvCmb = new DataGridViewCheckBoxColumn();
+            dgvCmb.ValueType = typeof(bool);
+            dgvCmb.Name = "Check";
+            dgvCmb.HeaderText = "Seleccionar";
+            TablaConectados.Columns.Add(dgvCmb);
             int i = 0;
             while (i < (Convert.ToInt32(trozos[1])))
             {
@@ -70,12 +77,13 @@ namespace WindowsFormsApplication1
                 server.Receive(msg2);
                 string [] trozos = Encoding.ASCII.GetString(msg2).Split('/');
                 int codigo = Convert.ToInt32(trozos[0]);
-                string mensaje = trozos[1].Split('\0')[0];
+                string mensaje;
                 int res;
 
                 switch (codigo)
                 {
                     case 1: //Respuesta a logueo
+                        mensaje = trozos[1].Split('\0')[0];
                         res = Convert.ToInt32(mensaje);
                         if (res == 0)
                         {
@@ -95,6 +103,7 @@ namespace WindowsFormsApplication1
                         }
                         break;
                     case 2:  //Respuesta a registro
+                        mensaje = trozos[1].Split('\0')[0];
                         res = Convert.ToInt32(mensaje);
                         if (res == 0)
                         {
@@ -110,6 +119,7 @@ namespace WindowsFormsApplication1
                         }
                         break;
                     case 3: //Número de veces enfrentadas
+                        mensaje = trozos[1].Split('\0')[0];
                         res = Convert.ToInt32(mensaje);
                         if (res == -1)
                             MessageBox.Show("Error");
@@ -119,6 +129,7 @@ namespace WindowsFormsApplication1
                             MessageBox.Show("El número de veces totales que se han enfrentado " + contrincante1.Text + " y " + contrincante2.Text + " es de " + res + " veces.");
                         break;
                     case 4: //Número de puntos
+                        mensaje = trozos[1].Split('\0')[0];
                         res = Convert.ToInt32(mensaje);
                         if (res == -1)
                             MessageBox.Show("Error");
@@ -128,10 +139,48 @@ namespace WindowsFormsApplication1
                             MessageBox.Show("El número de puntos totales obtenidos por " + jugadorP.Text + " es de " + res + ".");
                         break;
                     case 5: //Lista de los que han ganado a uno
+                        mensaje = trozos[1].Split('\0')[0];
                         MessageBox.Show(mensaje);
                         break;
                     case 6: //Lista conectados
                         TablaConectados.Invoke(new DelegadoParaDataGridView(PonDataGridView), new Object[] { trozos });
+                        break;
+                    case 7:
+                        MessageBox.Show("No hay partidas disponibles.");
+                        break;
+                    case 8:
+                        res = Convert.ToInt32(trozos[1]);
+                        string invitar = trozos[2].Split('\0')[0];
+                        DialogResult dialogResult = MessageBox.Show(invitar + " te ha invitado a una partida. Quieres jugar?", "Invitación recibida", MessageBoxButtons.YesNo);
+                        if (dialogResult == DialogResult.Yes)
+                        {
+                            // Enviamos respuesta a la invitación
+                            string mensaje2 = "7/" + res + "/SI";
+                            // Enviamos al servidor la respuesta
+                            byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje2);
+                            server.Send(msg);
+                        }
+                        else if (dialogResult == DialogResult.No)
+                        {
+                            // Enviamos respuesta a la invitación
+                            string mensaje2 = "7/" + res + "/NO";
+                            // Enviamos al servidor la respuesta
+                            byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje2);
+                            server.Send(msg);
+                        }
+                        break;
+                    case 9:
+                        res = Convert.ToInt32(trozos[1]);
+                        string invitado = trozos[2];
+                        string respuesta = trozos[3].Split('\0')[0];
+                        if (respuesta == "SI")
+                        {
+                            MessageBox.Show(invitado + " ha aceptado jugar la partida.");
+                        }
+                        else if (respuesta == "NO")
+                        {
+                            MessageBox.Show(invitado + " ha rechazado jugar la partida.");
+                        }
                         break;
                 }
             }
@@ -216,6 +265,42 @@ namespace WindowsFormsApplication1
                 byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje);
                 server.Send(msg);
             }
+            else if (Invitar.Checked)
+            {
+                List<string> invitados = new List<string>();
+                int i = 0;
+                while(i<TablaConectados.RowCount)
+                {
+                    if (Convert.ToBoolean(TablaConectados.Rows[i].Cells[1].Value))
+                    {
+                        invitados.Add(Convert.ToString(TablaConectados.Rows[i].Cells[0].Value));
+                    }
+                    i = i + 1;
+                }
+                //Quiere invitar a algunos jugadores
+                if(invitados.Count()==0)
+                {
+                    MessageBox.Show("Tienes que invitar a alguien.");
+                }
+                else if(invitados.Count>3)
+                {
+                    MessageBox.Show("El número máximo de personas invitadas es de 3.");
+                }
+                else
+                {
+                    string mensaje = "6";
+                    i = 0;
+                    while (i < invitados.Count)
+                    {
+                        mensaje = mensaje + "/" + invitados[i];
+                        i = i + 1;
+                    }
+                    // Enviamos al servidor el nombre tecleado
+                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje);
+                    server.Send(msg);
+                    MessageBox.Show("Invitaciones enviadas.");
+                }
+            }
         }
 
         private void DesconectarButton_Click(object sender, EventArgs e)
@@ -266,6 +351,23 @@ namespace WindowsFormsApplication1
             {
                 password.UseSystemPasswordChar = true;
                 label6.Text = "Mostrar contraseña";
+            }
+        }
+
+        private void TablaConectados_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+            int fila = e.RowIndex;
+            if (Convert.ToString(TablaConectados.Rows[fila].Cells[0].Value) != usuario.Text)
+            {
+                if (Convert.ToBoolean(TablaConectados.Rows[fila].Cells[1].Value))
+                {
+                    TablaConectados.Rows[fila].Cells[1].Value = false;
+                }
+                else
+                {
+                    TablaConectados.Rows[fila].Cells[1].Value = true;
+                }
             }
         }
     }

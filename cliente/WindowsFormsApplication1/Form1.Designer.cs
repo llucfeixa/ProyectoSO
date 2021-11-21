@@ -32,6 +32,7 @@
             this.usuario = new System.Windows.Forms.TextBox();
             this.EnviarButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Invitar = new System.Windows.Forms.RadioButton();
             this.TablaConectados = new System.Windows.Forms.DataGridView();
             this.jugadorG = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -89,6 +90,7 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.groupBox1.Controls.Add(this.Invitar);
             this.groupBox1.Controls.Add(this.TablaConectados);
             this.groupBox1.Controls.Add(this.jugadorG);
             this.groupBox1.Controls.Add(this.label5);
@@ -110,16 +112,29 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Petición";
             // 
+            // Invitar
+            // 
+            this.Invitar.AutoSize = true;
+            this.Invitar.Location = new System.Drawing.Point(600, 266);
+            this.Invitar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Invitar.Name = "Invitar";
+            this.Invitar.Size = new System.Drawing.Size(77, 24);
+            this.Invitar.TabIndex = 24;
+            this.Invitar.TabStop = true;
+            this.Invitar.Text = "Invitar";
+            this.Invitar.UseVisualStyleBackColor = true;
+            // 
             // TablaConectados
             // 
             this.TablaConectados.BackgroundColor = System.Drawing.SystemColors.Window;
             this.TablaConectados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TablaConectados.Location = new System.Drawing.Point(148, 265);
+            this.TablaConectados.Location = new System.Drawing.Point(157, 266);
             this.TablaConectados.Name = "TablaConectados";
             this.TablaConectados.RowHeadersWidth = 62;
             this.TablaConectados.RowTemplate.Height = 28;
             this.TablaConectados.Size = new System.Drawing.Size(237, 319);
             this.TablaConectados.TabIndex = 22;
+            this.TablaConectados.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TablaConectados_CellClick);
             // 
             // jugadorG
             // 
@@ -359,6 +374,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.DataGridView TablaConectados;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.RadioButton Invitar;
     }
 }
 

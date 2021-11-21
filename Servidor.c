@@ -9,6 +9,8 @@
 #include <mysql.h>
 #include <pthread.h>
 
+#define MAXPartidas 100
+
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int i;
@@ -23,6 +25,13 @@ typedef struct{
 	Conectado conectados[100];
 	int num;
 }ListaConectados;
+
+typedef struct{
+	int libre;
+	Conectado jugadores[4];
+}Partida;
+
+typedef Partida TablaPartidas[MAXPartidas];
 
 int Pon(ListaConectados *lista, char nombre[20], int socket)
 {
@@ -51,6 +60,45 @@ int DamePosicion(ListaConectados *lista, char nombre[20])
 	}
 	if (encontrado)
 		return i;
+	else
+		return -1;
+}
+
+int DameSocket(ListaConectados *lista, char nombre[20])
+{
+	//Devuelve el socket o -1 si no está en la lista
+	int i = 0;
+	int encontrado = 0;
+	while ((i < lista->num) && !encontrado)
+	{
+		if (strcmp(lista->conectados[i].nombre, nombre) == 0)
+			encontrado = 1;
+		if (!encontrado)
+			i++;
+	}
+	if (encontrado)
+		return lista->conectados[i].socket;
+	else
+		return -1;
+}
+
+int DameNombre(ListaConectados *lista, int sock, char nombre[20])
+{
+	//Devuelve el nombre o -1 si no está en la lista
+	int i = 0;
+	int encontrado = 0;
+	while ((i < lista->num) && !encontrado)
+	{
+		if (lista->conectados[i].socket == sock)
+			encontrado = 1;
+		if (!encontrado)
+			i++;
+	}
+	if (encontrado)
+	{
+		strcpy(nombre, lista->conectados[i].nombre);
+		return 0;
+	}
 	else
 		return -1;
 }
@@ -84,11 +132,57 @@ void DameConectados(ListaConectados *lista, char conectados[300])
 		sprintf(conectados, "%s/%s", conectados, lista->conectados[i].nombre);
 }
 
+void InicializarTabla(TablaPartidas tabla)
+{
+	while(i<MAXPartidas)
+	{
+		tabla[i].libre=0;
+		i=i+1;
+	}
+}
+
+int PonPartida(TablaPartidas tabla, ListaConectados *lista, char nombre[20], char invitados[100])
+{
+	int i=0;
+	int encontrado=0;
+	while(i<MAXPartidas && !encontrado)
+	{
+		if(tabla[i].libre == 0)
+		{
+			strcpy(tabla[i].jugadores[0].nombre, nombre);
+			tabla[i].jugadores[0].socket=DameSocket(lista, nombre);
+			char copia[100];
+			strcpy(copia, invitados);
+			char *p;
+			p = strtok(copia, "/");
+			int j = 1;
+			while(p!=NULL)
+			{
+				strcpy(tabla[i].jugadores[j].nombre, p);
+				tabla[i].jugadores[j].socket=DameSocket(lista, p);
+				p = strtok(NULL, "/");
+				j++;
+			}
+			tabla[i].libre = 1;
+			encontrado = 1;
+		}
+		if (!encontrado)
+		{
+			i++;
+		}
+	}
+	if (encontrado)
+		return i;
+	if (!encontrado)
+		return -1;
+}
+
 MYSQL *conn;
 int err;
 MYSQL_RES *resultado;
 MYSQL_ROW row;
 ListaConectados listaConectados;
+TablaPartidas tabla;
 
 int AbrirBaseDatos()
 {
@@ -280,13 +374,13 @@ void *AtenderCliente(void *socket)
 		//Escribimos el nombre en la consola
 		
 		printf ("Peticion: %s\n",peticion);
-		char *p = strtok( peticion, "/");
+		char *p = strtok(peticion, "/");
 		int codigo =  atoi (p);
 		char jugador1[20];
 		char jugador2[20];
 		char password[20];
 		
-		if (codigo != 0)
+		if (codigo != 0 && codigo != 6 && codigo != 7)
 		{
 			p = strtok( NULL, "/");
 			strcpy (jugador1, p);
@@ -340,7 +434,51 @@ void *AtenderCliente(void *socket)
 			printf ("Codigo: %d, jugador1: %s\n", codigo, jugador1);
 			GanarNombre(jugador1, respuesta);
 		}
-		if (codigo != 0)
+		else if (codigo ==6)
+		{
+			p = strtok(NULL, ",");
+			char invitados[100];
+			strcpy(invitados, p);
+			printf("%s\n",invitados);
+			char nombre[20];
+			DameNombre(&listaConectados, sock_conn, nombre);
+			pthread_mutex_lock(&mutex);
+			int pos = PonPartida(tabla, &listaConectados, nombre, invitados);
+			pthread_mutex_unlock(&mutex);
+			if(pos == -1)
+			{
+				printf("7/\n");
+				write(sock_conn, "7/", strlen("7/"));
+			}
+			else
+			{
+				char invitacion[100];
+				sprintf(invitacion, "8/%d/%s", pos, nombre);
+				printf("%s\n", invitacion);
+				int k = 1;
+				while(k<4)
+				{
+					if(strcmp(tabla[pos].jugadores[k].nombre,"") != 0)
+						write(tabla[pos].jugadores[k].socket, invitacion, strlen(invitacion));
+					k = k + 1;
+				}	
+			}
+		}
+		else if (codigo ==7)
+		{
+			p = strtok(NULL, "/");
+			int pos = atoi(p);
+			p = strtok(NULL, "/");
+			char respuesta_invitacion [10];
+			strcpy(respuesta_invitacion, p);
+			char invitacion[100];
+			char nombre[20];
+			DameNombre(&listaConectados, sock_conn, nombre);
+			sprintf(invitacion, "9/%d/%s/%s", pos, nombre, respuesta_invitacion);
+			printf("%s\n", invitacion);
+			write(tabla[pos].jugadores[0].socket, invitacion, strlen(invitacion));
+		}
+		if (codigo != 0 && codigo != 6 && codigo !=7)
 		{
 			printf ("%s\n", respuesta);
 			// Y lo enviamos
@@ -386,6 +524,7 @@ int main(int argc, char *argv[])
 		printf("Error en el Listen");
 	
 	int er = AbrirBaseDatos();
+	InicializarTabla(tabla);
 	
 	pthread_t thread[100];
 	

@@ -24,3 +24,5 @@ Versión 3 comunicada por Lluc
 URL: https://drive.google.com/file/d/1GJMR4PlOq4KP_IVsXBDOrJNTTfkDMp7s/view?usp=sharing
 
 Versión 4 generada por Pau
+
+Versión 4 verificada por Óscar

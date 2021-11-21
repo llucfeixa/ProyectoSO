@@ -26,3 +26,7 @@ URL: https://drive.google.com/file/d/1GJMR4PlOq4KP_IVsXBDOrJNTTfkDMp7s/view?usp=
 Versión 4 generada por Pau
 
 Versión 4 verificada por Óscar
+
+Versión 4 comunicada por Lluc
+
+URL: https://drive.google.com/file/d/1EYvsdO4jAcOfmIjReynSqNyau9oo7A0l/view?usp=sharing

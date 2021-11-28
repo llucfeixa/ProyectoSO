@@ -34,3 +34,7 @@ URL: https://drive.google.com/file/d/1EYvsdO4jAcOfmIjReynSqNyau9oo7A0l/view?usp=
 Versión 5 generada por Lluc
 
 Versión 5 verificada por Pau
+
+Versión 5 comunicada por Óscar
+
+URL: https://drive.google.com/file/d/18BXe53vrGHMOxr515u3TmdDc9s2rmikX/view?usp=sharing

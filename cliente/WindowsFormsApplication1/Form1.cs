@@ -18,12 +18,13 @@ namespace WindowsFormsApplication1
         Thread atender;
         int connected = 0;
         delegate void DelegadoParaDataGridView(string [] info);
+        delegate void DelegadoParaHacerVisible();
+        delegate void DelegadoParaMensajeChat(string jugador, string mensaje);
+        List<Form2> formularios = new List<Form2>();
 
         public Form1()
         {
             InitializeComponent();
-            CheckForIllegalCrossThreadCalls = false; //Necesario para que los elementos de los formularios puedan ser
-            //accedidos desde threads diferentes a los que los crearon
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -35,10 +36,16 @@ namespace WindowsFormsApplication1
             TablaConectados.ReadOnly = true;
         }
 
+        private void PonerEnMarchaFormulario(int id)
+        {
+            int cont = formularios.Count();
+            Form2 f = new Form2(cont, server, id);
+            formularios.Add(f);
+            f.ShowDialog();
+        }
+
         private void PonDataGridView(string[] trozos)
         {
-            
-            trozos[trozos.Length - 1] = trozos[trozos.Length - 1].Split('\0')[0];
             TablaConectados.Rows.Clear();
             TablaConectados.RowHeadersVisible = false;
             TablaConectados.ColumnCount = 1;
@@ -68,6 +75,14 @@ namespace WindowsFormsApplication1
             TablaConectados.ClearSelection();
         }
 
+        private void HacerVisible()
+        {
+            this.BackColor = Color.Green;
+            groupBox1.Visible = true;
+            DesconectarButton.Visible = true;
+            groupBox2.Visible = false;
+        }
+
         private void AtenderServidor()
         {
             while (true)
@@ -75,23 +90,20 @@ namespace WindowsFormsApplication1
                 //Recibimos la respuesta del servidor
                 byte[] msg2 = new byte[80];
                 server.Receive(msg2);
-                string [] trozos = Encoding.ASCII.GetString(msg2).Split('/');
+                string mensaje = Encoding.ASCII.GetString(msg2).Split('\0')[0];
+                string[] trozos = mensaje.Split('/');
                 int codigo = Convert.ToInt32(trozos[0]);
-                string mensaje;
                 int res;
+                int numForm;
 
                 switch (codigo)
                 {
                     case 1: //Respuesta a logueo
-                        mensaje = trozos[1].Split('\0')[0];
-                        res = Convert.ToInt32(mensaje);
+                        res = Convert.ToInt32(trozos[1]);
                         if (res == 0)
                         {
                             MessageBox.Show("Logueado correctamente.");
-                            this.BackColor = Color.Green;
-                            groupBox1.Visible = true;
-                            DesconectarButton.Visible = true;
-                            groupBox2.Visible = false;
+                            Invoke(new DelegadoParaHacerVisible(HacerVisible));
                         }
                         else if (res == -1)
                         {
@@ -103,8 +115,7 @@ namespace WindowsFormsApplication1
                         }
                         break;
                     case 2:  //Respuesta a registro
-                        mensaje = trozos[1].Split('\0')[0];
-                        res = Convert.ToInt32(mensaje);
+                        res = Convert.ToInt32(trozos[1]);
                         if (res == 0)
                         {
                             MessageBox.Show("Registrado correctamente.");
@@ -119,8 +130,7 @@ namespace WindowsFormsApplication1
                         }
                         break;
                     case 3: //Número de veces enfrentadas
-                        mensaje = trozos[1].Split('\0')[0];
-                        res = Convert.ToInt32(mensaje);
+                        res = Convert.ToInt32(trozos[1]);
                         if (res == -1)
                             MessageBox.Show("Error");
                         else if (res == -2)
@@ -129,8 +139,7 @@ namespace WindowsFormsApplication1
                             MessageBox.Show("El número de veces totales que se han enfrentado " + contrincante1.Text + " y " + contrincante2.Text + " es de " + res + " veces.");
                         break;
                     case 4: //Número de puntos
-                        mensaje = trozos[1].Split('\0')[0];
-                        res = Convert.ToInt32(mensaje);
+                        res = Convert.ToInt32(trozos[1]);
                         if (res == -1)
                             MessageBox.Show("Error");
                         else if (res == -2)
@@ -139,8 +148,7 @@ namespace WindowsFormsApplication1
                             MessageBox.Show("El número de puntos totales obtenidos por " + jugadorP.Text + " es de " + res + ".");
                         break;
                     case 5: //Lista de los que han ganado a uno
-                        mensaje = trozos[1].Split('\0')[0];
-                        MessageBox.Show(mensaje);
+                        MessageBox.Show(trozos[1]);
                         break;
                     case 6: //Lista conectados
                         TablaConectados.Invoke(new DelegadoParaDataGridView(PonDataGridView), new Object[] { trozos });
@@ -150,8 +158,7 @@ namespace WindowsFormsApplication1
                         break;
                     case 8:
                         res = Convert.ToInt32(trozos[1]);
-                        string invitar = trozos[2].Split('\0')[0];
-                        DialogResult dialogResult = MessageBox.Show(invitar + " te ha invitado a una partida. Quieres jugar?", "Invitación recibida", MessageBoxButtons.YesNo);
+                        DialogResult dialogResult = MessageBox.Show(trozos[2] + " te ha invitado a una partida. Quieres jugar?", "Invitación recibida", MessageBoxButtons.YesNo);
                         if (dialogResult == DialogResult.Yes)
                         {
                             // Enviamos respuesta a la invitación
@@ -170,17 +177,65 @@ namespace WindowsFormsApplication1
                         }
                         break;
                     case 9:
-                        res = Convert.ToInt32(trozos[1]);
-                        string invitado = trozos[2];
-                        string respuesta = trozos[3].Split('\0')[0];
-                        if (respuesta == "SI")
+                        if (trozos[3] == "SI")
                         {
-                            MessageBox.Show(invitado + " ha aceptado jugar la partida.");
+                            MessageBox.Show(trozos[2] + " ha aceptado jugar la partida.");
                         }
-                        else if (respuesta == "NO")
+                        else if (trozos[3] == "NO")
                         {
-                            MessageBox.Show(invitado + " ha rechazado jugar la partida.");
+                            MessageBox.Show(trozos[2] + " ha rechazado jugar la partida.");
                         }
+                        break;
+                    case 10:
+                        //Invoke para abrir formulario
+                        ThreadStart ts = delegate { PonerEnMarchaFormulario(Convert.ToInt32(trozos[1])); };
+                        Thread T = new Thread(ts);
+                        T.Start();
+                        break;
+                    case 11:
+                        MessageBox.Show("Todos los usuarios invitados han rechazado jugar la partida.");
+                        break;
+                    case 12:
+                        DialogResult dialogResult2 = MessageBox.Show((Convert.ToInt32(trozos[2]) - 1) + " personas han aceptado la invitación a la partida. Todavía quieres jugar?", "Invitación recibida", MessageBoxButtons.YesNo);
+                        if (dialogResult2 == DialogResult.Yes)
+                        {
+                            // Enviamos respuesta a la invitación
+                            string mensaje2 = "8/" + trozos[1] + "/SI";
+                            // Enviamos al servidor la respuesta
+                            byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje2);
+                            server.Send(msg);
+                        }
+                        else if (dialogResult2 == DialogResult.No)
+                        {
+                            // Enviamos respuesta a la invitación
+                            string mensaje2 = "8/" + trozos[1] + "/NO";
+                            // Enviamos al servidor la respuesta
+                            byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje2);
+                            server.Send(msg);
+                        }
+                        break;
+                    case 13:
+                        MessageBox.Show("El anfitrión ha decidido no jugar la partida porque no todos los invitados han aceptado.");
+                        break;
+                    case 14:
+                        int pos = Convert.ToInt32(trozos[1]);
+                        numForm = Convert.ToInt32(trozos[2]);
+                        string jugador = trozos[3];
+                        string chat = trozos[4];
+                        int i = 0;
+                        bool encontrado = false;
+                        while (i<formularios.Count() && encontrado == false)
+                        {
+                            if (formularios[i].Partida() == pos)
+                            {
+                                encontrado = true;
+                            }
+                            if (encontrado == false)
+                            {
+                                i = i + 1;
+                            }
+                        }
+                        formularios[i].Invoke(new DelegadoParaMensajeChat(formularios[i].TomaMensajeChat), new object[] { jugador, chat });
                         break;
                 }
             }

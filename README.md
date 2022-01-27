@@ -43,6 +43,6 @@ Versión Final generada por Óscar
 
 Versión Final verificada por Lluc
 
-Versión Final comunicada por Pau
+Versión Final comunicada por Pa
 
 URL: https://drive.google.com/file/d/1-kduJJKlOlcZ9bjoGKehgqYxE_XcL_B7/view?usp=sharing
